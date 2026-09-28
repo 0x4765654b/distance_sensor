@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# KiCad session files
+*.lck
+.history/
+*-backups/
+fp-info-cache
+*.kicad_prl
+
+# generator scratch (netlist, DSN/SES, board backup)
+kicad/DepthSensor/build/
+
+# Python
+__pycache__/
+*.pyc
+
+# Freerouting jar: download separately (see kicad/DepthSensor/gen_pcb.py)
+kicad/freerouting/*.jar
