@@ -59,7 +59,7 @@ Carrier reference designators (schematic `kicad/DepthSensor/DepthSensor.kicad_sc
 
 The US-100 UART-mode jumper must be installed.
 
-### J_PANEL — 2×8 shrouded, to hand-wired lid (ribbon ~20 cm)
+### J_PANEL — 2×8 shrouded, to the lid panel's J_LID (1:1 ribbon, ~20 cm)
 
 | Pin | Net | Lid part | | Pin | Net | Lid part |
 |---|---|---|---|---|---|---|
@@ -72,7 +72,8 @@ The US-100 UART-mode jumper must be installed.
 | 13 | `SW_B` | Switch throw | | 14 | `SW_B` | Switch throw |
 | 15 | `GND` | LED cathodes, button | | 16 | `GND` | LED cathodes, button |
 
-`LED_An` = U2 OUTn → current resistor on the carrier (values in requirements §5.1).
+`LED_An` = U2 OUTn → current resistor on the carrier (values in requirements §5.1). J_LID on the lid panel
+(`kicad/LidPanel`) has the same pin numbers and nets. On the lid board, D7 pin 1 = red (`LED_A8`), pin 2 = K, pin 3 = green (`LED_A7`).
 
 ### J_SPARE — 1×4
 

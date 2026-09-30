@@ -8,6 +8,23 @@ revision.
 
 ### Added
 - README and CHANGELOG.
+- **Lid panel PCB rev 0.1** (`kicad/LidPanel`), replacing the hand-wired lid (requirements v0.8: D-10, §3.2, §5.3,
+  MEC-06, MEC-09). It is 50 × 63 mm and passive: 8 flat-top 5 mm LEDs, J2/J3 pads for the panel switch and button,
+  and a right-angle 2×8 header J_LID wired 1:1 to J_PANEL. ERC and DRC clean, schematic parity clean.
+  - The 1:1 lid drilling template is on the board's User.Drawings layer.
+  - The lid ribbon now has an IDC socket at both ends. Bezels, the GND bus wire and most heat-shrink are gone.
+  - `docs/lid-pick-list.md`: the lid board's own pick list, with 10 mm nylon LED spacers as the LED housings, and an
+    assembly order.
+- `kicad/lib/schgen.py` and `kicad/lib/pcbgen.py`: generator helpers shared by both boards. The carrier's
+  generators now use them, with unchanged output.
+
+### Changed
+- **Carrier rev 0.2:** removed the top tab, which held no parts. The board is now 80.5 × 92 mm, with only the
+  bottom tab (the kit's USB end and J1 must reach the bottom wall, MEC-03). The silkscreen reads v0.2.
+  - Rerouted. C4 and J4 moved 0.5 mm down, and a fixed +3V3 stub leads U1 pad 1 out from under the antenna slot
+    (`PREROUTE` in `gen_pcb.py`).
+  - DRC: 0 errors, 0 unconnected items, schematic parity clean.
+  - The Gerbers in `depth_gerber/` are still rev 0.1 and must be re-exported.
 
 ## [carrier-0.1] — 2026-09-28
 

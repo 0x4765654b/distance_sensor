@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "SaltMon")(type "KiCad")(uri "${KIPRJMOD}/../lib/SaltMon.pretty")(options "")(descr "Salt monitor project footprints"))
+)

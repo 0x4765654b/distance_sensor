@@ -28,15 +28,18 @@ tools/                    provision.py, saltmon-config.py          (planned)
 | [docs/requirements.md](docs/requirements.md) | System requirements: design decisions, parts, power, LEDs, sensor, firmware, cloud, mechanics, verification |
 | [docs/pinmap.md](docs/pinmap.md) | Kit header pads, carrier connectors, U2 pinout. Source of truth for firmware `board.h` |
 | [docs/integration-contract.md](docs/integration-contract.md) | SNS message contract between SaltMon and its consumers (ChoreCore) |
-| [docs/pick-list.md](docs/pick-list.md) | Everything to buy or gather for one build |
+| [docs/pick-list.md](docs/pick-list.md) | Everything to buy or gather for one build (carrier, cables, enclosure) |
+| [docs/lid-pick-list.md](docs/lid-pick-list.md) | The lid panel board: parts, LED spacers, mounting hardware, assembly order |
 
 ## Hardware
 
-- **Carrier PCB:** 80.5 × 106 mm, 2-layer, all through-hole. The ESP32-C6-DevKitM-1 plugs into female headers.
+- **Carrier PCB:** 80.5 × 92 mm, 2-layer, all through-hole. The ESP32-C6-DevKitM-1 plugs into female headers.
   The board also carries a TBD62783APG LED driver, the power path (fuse, lid switch loop, Schottky diode), the
   sensor-line filters, and keyed headers for the lid ribbon (J_PANEL) and the sensor ribbon (J_SNS).
-- **Lid:** hand-wired, with 8 LEDs (salt level, network, activity, power), an on/off slide switch and a push-button.
-  One 16-way ribbon connects it all. What each LED shows is in requirements §5.4.
+- **Lid panel PCB:** 50 × 63 mm, passive, on standoffs behind the lid. It holds 8 flat-top LEDs (salt level,
+  network, activity, power) and pads for the panel-mounted on/off slide switch and push-button. A 16-way ribbon
+  with an IDC socket at each end connects it 1:1 to the carrier. The same KiCad file carries the 1:1 lid drilling
+  template on User.Drawings. What each LED shows is in requirements §5.4.
 - **Sensor:** a US-100 in UART mode on a 6-way ribbon, about 1.2 m long.
 - **Enclosure:** a gasketed ABS junction box, wall-mounted through its 4 corner holes.
 
@@ -59,7 +62,14 @@ $CLI sch erc kicad/DepthSensor/DepthSensor.kicad_sch
 $KPY kicad/DepthSensor/gen_pcb.py                  # place, autoroute (Freerouting), pour GND
 $KPY kicad/DepthSensor/gen_pcb.py --no-route       # placement only
 $CLI pcb drc --schematic-parity kicad/DepthSensor/DepthSensor.kicad_pcb
+
+python3 kicad/LidPanel/gen_schematic.py           # lid panel: same steps
+$KPY kicad/LidPanel/gen_pcb.py
+$CLI pcb drc --schematic-parity kicad/LidPanel/LidPanel.kicad_pcb
+$CLI pcb export pdf --mode-single -l User.Drawings --scale 1 -o lid-template.pdf kicad/LidPanel/LidPanel.kicad_pcb
 ```
+
+Helpers shared by both boards are in `kicad/lib/schgen.py` (schematic) and `kicad/lib/pcbgen.py` (PCB).
 
 `gen_pcb.py` needs Java 21+ and the Freerouting jar at `kicad/freerouting/freerouting-*.jar`. The jar is not in git;
 download it from the [Freerouting releases](https://github.com/freerouting/freerouting/releases). It was tested

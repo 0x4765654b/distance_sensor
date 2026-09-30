@@ -1,6 +1,6 @@
-# SaltMon Pick List — carrier rev 0.1
+# SaltMon Pick List — carrier rev 0.2
 
-One build. Refs match `kicad/DepthSensor/DepthSensor.kicad_sch`; specs come from `docs/requirements.md` §3, §4 and §9.
+One build. Refs match `kicad/DepthSensor/DepthSensor.kicad_sch`; the lid panel has its own list, [lid-pick-list.md](lid-pick-list.md); specs come from `docs/requirements.md` §3, §4 and §9.
 Everything is through-hole. **Have** = the part is already on hand.
 
 ## 1. Carrier PCB — ICs, modules, sockets
@@ -52,21 +52,10 @@ Everything is through-hole. **Have** = the part is already on hand.
 
 TP1–TP6 are bare pads, and H1–H4 are holes, so there's nothing to buy for them.
 
-## 6. Lid (hand-wired)
+## 6. Lid panel PCB
 
-| ✓ | Qty | Part | Refs | Notes |
-|---|---|---|---|---|
-| ☐ | 1 | 5 mm LED, green | FULL | |
-| ☐ | 1 | 5 mm LED, yellow | MID | |
-| ☐ | 1 | 5 mm LED, orange | LOW | |
-| ☐ | 1 | 5 mm LED, red | REFILL | |
-| ☐ | 1 | 5 mm LED, blue | DATA | |
-| ☐ | 1 | 5 mm LED, purple | SENS | |
-| ☐ | 1 | 5 mm LED, bi-color red/green, **common cathode**, 3-lead | NET | |
-| ☐ | 1 | 5 mm LED, white | PWR | |
-| ☐ | 8 | 5 mm LED panel bezels (Ø6.3 mm hole typical) | | One per LED position |
-| **Have** | 1 | SPDT mini slide switch, 2 A | SW1 | Uses the common pin and one throw |
-| ☐ | 1 | Momentary push-button, normally open, panel mount (12 or 16 mm class) | SW2 | Body ≤ 20 mm deep |
+See [lid-pick-list.md](lid-pick-list.md): the board, LEDs, LED spacers, header, switch and button, mounting
+hardware and the lid cable.
 
 ## 7. Sensor and cables
 
@@ -76,8 +65,7 @@ TP1–TP6 are bare pads, and H1–H4 are holes, so there's nothing to buy for th
 | ☐ | ~1.3 m | 6-way 0.05" (1.27 mm) flat ribbon, 28 AWG | Sensor cable, about 1.2 m plus trim |
 | ☐ | 1 | 2×3 IDC ribbon socket, 2.54 mm | Carrier end of the sensor cable |
 | ☐ | 1 | 1×5 Dupont female housing + 5 crimp pins | Sensor end |
-| ☐ | ~0.3 m | 16-way 0.05" flat ribbon | Lid cable, about 20 cm plus trim |
-| ☐ | 2 | 2×8 IDC ribbon socket, 2.54 mm | Carrier end of the lid cable, plus one for the bench jumper plug |
+| ☐ | 1 | 2×8 IDC ribbon socket, 2.54 mm | Bench jumper plug (below). The lid cable is in the lid pick list |
 
 **Bench jumper plug:** a spare 2×8 IDC socket with pins 11–14 shorted, so the board powers up without the lid attached (PWR-05).
 
@@ -104,15 +92,12 @@ TP1–TP6 are bare pads, and H1–H4 are holes, so there's nothing to buy for th
 
 | ✓ | Part | Use |
 |---|---|---|
-| ☐ | Heat-shrink tubing (assorted small) | Lid LED and switch joints |
-| ☐ | Bare tinned wire (22–24 AWG) | Lid GND bus for the LED cathodes and SW2 |
 | ☐ | Conformal coating | Back of the US-100 PCB only, not the transducers (SNS-05) |
 | ☐ | Dielectric grease | Dupont contacts at the sensor |
 | ☐ | Label | BLE proof-of-possession code, inside the box (SEC-01) |
-| ☐ | Glue or ribbon clamp | Lid cable strain relief |
 
 ## Tools you might not already have
 
 - IDC ribbon crimp tool or a small vise, for the IDC sockets.
 - Dupont crimper, for the sensor-end housing.
-- Step drill (5 mm LED bezels, push-button) and a file for the USB-C (13 × 8 mm) and slide-switch cut-outs.
+- A file for the USB-C cut-out (13 × 8 mm) and an 8 mm drill for the DC jack. Lid tools are in the lid pick list.

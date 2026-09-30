@@ -10,6 +10,7 @@ fp-info-cache
 
 # generator scratch (netlist, DSN/SES, board backup)
 kicad/DepthSensor/build/
+kicad/LidPanel/build/
 
 # Python
 __pycache__/

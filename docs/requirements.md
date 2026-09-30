@@ -1,6 +1,6 @@
 # Salt Level Monitor — System Requirements
 
-Status: **DRAFT v0.7** (2026-09-28) — design phase. Covers the hardware (one carrier PCB + hand-wired lid panel), device firmware, the `SaltMon` AWS stack, and the ChoreCore consumer contract. Open items are in [§12](#12-open-questions).
+Status: **DRAFT v0.8** (2026-09-30) — design phase. Covers the hardware (carrier PCB + passive lid panel PCB), device firmware, the `SaltMon` AWS stack, and the ChoreCore consumer contract. Open items are in [§12](#12-open-questions).
 
 Reference docs in `docs/`:
 - `4019_Web.pdf` — Adafruit US-100
@@ -74,9 +74,9 @@ From the Culligan Gold Series specification: the user's **375 lb** salt tank is 
  │     GPIO19 ◄── button ───────────────────── J_PANEL                                     │
  │  V_SYS ─► R_PWR ─────────────────────────► J_PANEL                                      │
  └────────────────────────────────────────────────────╥────────────────────────────────────┘
-                                                      ║ 16-way IDC ribbon, ~20 cm, fanned out
- ┌──────────── Box lid (hand-wired, no PCB) ──────────╨───────────┐
- │  9 × 5 mm LEDs in bezels · panel slide switch · push-button    │
+                                                      ║ 16-way IDC ribbon, ~20 cm, IDC socket each end, 1:1
+ ┌──────────── Lid panel PCB (behind the lid) ────────╨───────────┐
+ │  8 × 5 mm flat-top LEDs · pads for panel switch + push-button  │
  └────────────────────────────────────────────────────────────────┘
        Wi-Fi 2.4 GHz ─► router ─► AWS IoT Core ─► SaltMon stack (ingest · history · forecast) ─► SNS ─► ChoreCore (chore · reminders · UI)
 ```
@@ -96,7 +96,7 @@ From the Culligan Gold Series specification: the user's **375 lb** salt tank is 
 | D-07 | LED driver: TBD62783APG (8-ch source driver). All cathodes go to GND. | Through-hole; 3.3 V inputs; suits the common-cathode bi-color LED. |
 | D-08 | White power LED is hard-wired to V_SYS. | "Power stays on dimly" |
 | D-09 | Separate indicators for network status (bi-color), network activity (Blue), and sensor activity (Purple). | User |
-| D-10 | **Lid is hand-wired (no panel PCB).** The LEDs sit in 5 mm panel bezels, and the switch and button are panel-mounted. Everything is soldered to the fanned-out conductors of a 16-way IDC ribbon that plugs into keyed J_PANEL on the carrier. | User choice. The lid still unplugs from the carrier with one connector. |
+| D-10 | **Lid panel PCB** (`kicad/LidPanel`, 50 × 63 mm, passive) on standoffs behind the lid. It holds the 8 flat-top LEDs, solder pads for the panel-mounted switch and button, and J_LID, a right-angle 2×8 shrouded header wired 1:1 to J_PANEL. The resistors, driver and pull-up stay on the carrier. The switch and button stay panel-mounted so the lid seals. | Replaces the hand-wired lid (v0.7): no fanned-out ribbon, no GND bus wire, and the board doubles as a drilling jig. The lid still unplugs from the carrier with one connector. |
 | D-11 | Power switch = user's panel-mount SPDT mini slide switch (**2 A, 125 V AC**), used as SPST (common + one throw). F1 = **0.75 A hold**. | 2 A is about 4× the 480 mA peak. The 0.75 A fuse protects the 28 AWG ribbon conductors in the switch loop. |
 | D-12 | Sensor cable = 6-way 0.05" flat ribbon, **keyed 2×3 IDC** at the carrier and a 1×5 2.54 mm Dupont housing at the sensor. | The keyed carrier end can't be plugged in backwards. The sensor end plugs onto the US-100's own header. |
 | D-13 | Reverse-polarity protection is a series Schottky diode. | Also blocks backfeed from the kit's 5V/USB supply. |
@@ -132,21 +132,22 @@ From the Culligan Gold Series specification: the user's **375 lb** salt tank is 
 | J_PANEL | 2×8 **shrouded (keyed)** box header, 2.54 mm | THT | Lid wiring ribbon |
 | J_SPARE | 1×4 male header (3V3, GND, GPIO20, GPIO21) | THT | |
 
-### 3.2 Lid Parts (hand-wired)
+### 3.2 Lid Panel Parts (`kicad/LidPanel`)
 
 | Ref | Part | Notes |
 |---|---|---|
-| LED1–9 | 5 mm LEDs: Green, Yellow, Orange, Red, Blue, Purple, Bi-color R/G (common cathode), White | In 5 mm plastic panel bezels (Ø6.3 mm hole typical, press-in or nut). The leads are soldered to the ribbon conductors and covered with heat-shrink. **The current resistors stay on the carrier.** |
-| SW1 | User's SPDT mini slide switch, panel mount, 2 A / 125 V AC | Rectangular slot in the lid plus 2 screw holes (measure the part). Uses the common pin and one throw pin. |
-| SW2 | Momentary panel push-button, normally open, 7 mm or 12 mm threaded bushing (e.g. PBS-110 / 16 mm "R13-507" class) | To be purchased. Connects between BTN and GND. |
-| — | Common GND bus: bare tinned wire linking all LED cathodes and SW2, taken to ribbon pins 15/16 | |
+| D1–D8 | 5 mm **flat-top** LEDs: D1 Green, D2 Yellow, D3 Orange, D4 Red, D5 Blue, D6 Purple, D7 Bi-color R/G (3-lead common cathode, assumed pin order R / K / G: check the part), D8 White | Soldered to the lid board on 10 mm nylon LED spacers. The body goes through a Ø5.0 mm lid hole and the flange stops against the inside of the lid (no bezels). **The current resistors stay on the carrier.** |
+| J1 (J_LID) | 2×8 shrouded box header, 2.54 mm, **right-angle** | On the back of the board; the ribbon leaves toward the top wall. |
+| SW1 | User's SPDT mini slide switch, panel mount, 2 A / 125 V AC | Rectangular slot in the lid plus 2 screw holes (measure the part). Common pin and one throw pin wired to board pads J2 (SW_A, SW_B). |
+| SW2 | Momentary panel push-button, normally open, 7 mm or 12 mm threaded bushing (e.g. PBS-110 / 16 mm "R13-507" class) | To be purchased. Wired to board pads J3 (BTN, GND). |
+| H1–H4 | M3 mounting holes, 43 × 56 mm pitch | MEC-09 |
 
 ### 3.3 Cables
 
 | Cable | Construction |
 |---|---|
 | Sensor | 6-way 0.05" flat ribbon, 28 AWG, **~1.2 m** (0.6 m run + slack so the lid can be lifted and set aside). Carrier end: 2×3 IDC socket. Sensor end: conductors 1–5 crimped into a 1×5 Dupont female housing (VCC, TX, RX, GND, GND); conductor 6 not used. Pin-1 stripe = VCC. Strain relief at both ends. |
-| Lid | 16-way 0.05" flat ribbon, ~20 cm (enough to open the lid and lay it beside the box). A 2×8 IDC socket at the carrier end; the lid end is split into single conductors and soldered to the parts. Glue or clamp the ribbon to the lid for strain relief. Label each conductor. |
+| Lid | 16-way 0.05" flat ribbon, ~20 cm (enough to open the lid and lay it beside the box). A 2×8 IDC socket at **each end**, crimped 1:1 with the pin-1 stripe at the pin-1 mark of both sockets (J_PANEL pin *n* = J_LID pin *n*). |
 
 ---
 
@@ -211,17 +212,21 @@ From the Culligan Gold Series specification: the user's **375 lb** salt tank is 
 | 13 | SW_B (to D1) | 14 | SW_B |
 | 15 | GND | 16 | GND |
 
-### 5.3 Lid Layout (lid = front face when wall-mounted; drilling template in `docs/`)
+### 5.3 Lid Layout (lid = front face when wall-mounted; drilling template: MEC-06)
 
 ```
-   ┌─────────────── 4.5 in ───────────────┐
-   │  SALT LEVEL            ● PWR (white) │
-   │   ● FULL  (green)      ● NET  (R/G)  │
-   │   ● MID   (yellow)     ● DATA (blue) │
-   │   ● LOW   (orange)     ● SENS (purple)│
-   │   ● REFILL(red)                      │
-   │                     [ON|OFF]   (BTN) │
-   └──────────────────────────────────────┘
+   Viewed from outside, portrait, bottom wall down. mm from the lid's inside top-left corner.
+   ┌──────────── 82.6 ────────────┐
+   │                              │
+   │    x 26.3         x 56.3     │
+   │    ● FULL         ● PWR      │  y 35
+   │    ● MID          ● NET      │  y 46
+   │    ● LOW          ● DATA     │  y 57
+   │    ● REFILL       ● SENS     │  y 68
+   │                              │
+   │    [ON|OFF]        (BTN)     │  y 88   (x 30, x 52)
+   │                              │
+   └──────────────────────────────┘ 108
 ```
 
 ### 5.4 Indicator Behavior
@@ -463,14 +468,14 @@ Enclosure: the user's unlabeled ABS gasketed junction box. Measured 2026-09-28 (
 ```
       Carrier outline, inside view (portrait, lid toward viewer), mm
       ┌──┐◄──────────── 82.6 inside ────────────►┌──┐
-      │P │ 20.5 ┌─────────── 39.5 ─────────┐ 20.5│ P│  P = pillar 19.1 × 12.7
-      └──┘──────┘   U2 · J_PANEL · J_SNS   └─────└──┘
-         │                                      │
-         │  side   ┌── kit antenna ──┐   side   │   board 106 × 80.5
-         │  zone   │  keep-out 15 mm │   zone   │   corner notches 14 × 20.5
-         │ (R, C,  │                 │ (F1, D1, │
-         │  J_SPARE│   ESP32-C6 kit  │   C1)    │
-      ┌──┐──────┐  │   25.4 × 48.3   │ ┌─────└──┐
+      │P │                                      │ P│  P = pillar 19.1 × 12.7
+      └──┘──────────────────────────────────────└──┘
+         │      U2 · J_PANEL · RN1 · R1–R8      │
+         │  side   ┌── kit antenna ──┐   side   │   board 92 × 80.5
+         │  zone   │  keep-out 15 mm │   zone   │   (bottom tab 14 × 39.5)
+         │ (F1, D1,│                 │ (R, C,   │
+         │  C1)    │   ESP32-C6 kit  │  J_SNS,  │
+      ┌──┐──────┐  │   25.4 × 48.3   │ ┌J_SPARE)└──┐
       │P │      │  └────┤USB├────────┘J1│     │ P│
       └──┘      └───────────────────────┘     └──┘
                 ▲ bottom wall: USB-C cut-out + DC jack hole
@@ -479,13 +484,14 @@ Enclosure: the user's unlabeled ABS gasketed junction box. Measured 2026-09-28 (
 | ID | Requirement |
 |---|---|
 | MEC-01 | The box is wall-mounted in portrait with the lid facing out (lid = front panel, §5.3). The **bottom wall** (the short wall) carries the DC jack hole and the USB-C cut-out, which exposes the UART port. The **sensor ribbon** leaves through a grommet or slot in the side wall just above the lower pillar, with a drip loop and strain relief (a cable tie through two holes in the carrier). |
-| MEC-02 | **Carrier outline 106.0 × 80.5 mm, with 14.0 × 20.5 mm notches at all four corners** (≈ 1 mm clearance to walls and pillars). The end tabs are 39.5 mm wide and fit between the pillars with 2.5 mm clearance per side. |
-| MEC-03 | The bottom tab holds the dev kit (USB end flush with the tab edge, 1 mm from the wall) and J1 beside it. That is 25.4 + 9 mm plus gaps, about 37.5 of the 39.5 mm available. The **antenna end points into the box center**. The antenna keep-out (MCU-02) goes there: a ~26 × 15 mm routed slot under the antenna overhang, and no copper within 15 mm. The top tab and side zones hold U2, the resistors, J_PANEL, J_SNS, F1, D1, and C1. |
+| MEC-02 | **Carrier outline 92.0 × 80.5 mm: a full-width body with one 14.0 × 39.5 mm tab at the bottom end** (14.0 × 20.5 mm notches at the two bottom corners, ≈ 1 mm clearance to walls and pillars). The tab fits between the bottom pillars with 2.5 mm clearance per side. The top edge is straight and sits just below the top pillars; the top tab of rev 0.1 held no parts and was removed in rev 0.2. |
+| MEC-03 | The bottom tab holds the dev kit (USB end flush with the tab edge, 1 mm from the wall) and J1 beside it. That is 25.4 + 9 mm plus gaps, about 37.5 of the 39.5 mm available. The **antenna end points into the box center**. The antenna keep-out (MCU-02) goes there: a ~26 × 15 mm routed slot under the antenna overhang, and no copper within 15 mm. The full-width body holds U2, the resistors, J_PANEL, J_SNS, F1, D1, and C1. |
 | MEC-04 | Stack height from the floor: standoffs 6 mm → carrier 1.6 mm (top at 7.6) → female headers 8.5 mm → kit PCB (top at 17.7) → **USB-C centered about 19.3 mm above the floor**. **DC jack (PJ-102AH) axis about 14.1 mm above the floor.** The tallest carrier part is C1 (8 × 11.5 mm, top at 19.1). Tallest overall is the kit and module at about 21 mm, which leaves about 23 mm in the base plus 12.7 mm in the lid for the lid-mounted parts (the push-button body is ≤ 20 mm deep). The USB-C cut-out is 13 × 8 mm (clears a plug overmold through the 3.2 mm wall), and the jack hole is Ø8 mm. |
 | MEC-05 | Mounting: 4 × M3 holes in the full-width region, just inside the notches. The carrier sits on 6 mm nylon standoffs, screwed to the molded floor bosses if they line up, otherwise through M3 holes drilled in the floor with sealing washers. |
-| MEC-06 | Lid parts stay inside the gasket line and clear of the four pillar screws. A 1:1 **drilling template** (PDF) is produced for the lid. After drilling, seal the bezels, switch, and button with their own nuts or gaskets, or with a bead of silicone. |
+| MEC-06 | Lid parts stay inside the gasket line and clear of the four pillar screws. The 1:1 **drilling template** is the User.Drawings layer of `kicad/LidPanel/LidPanel.kicad_pcb` (export command in `kicad/LidPanel/gen_pcb.py`). Print it at 100 %, check the 50 mm bar, and tape it to the outside of the lid. After drilling, seal the switch and button with their own nuts or gaskets and run a bead of silicone around each LED flange on the inside. |
 | MEC-07 | The box is mounted through its 4 corner screw holes. There are no wall screws through the base floor in the board area, and the carrier has no screw keep-clear zones. |
-| MEC-08 | Carrier PCB: 2-layer, 1.6 mm, 1 oz copper. GND pour everywhere except the antenna keep-out. Passes KiCad ERC and DRC with zero errors. |
+| MEC-08 | Carrier and lid PCBs: 2-layer, 1.6 mm, 1 oz copper, all through-hole. GND pour everywhere except the carrier's antenna keep-out. Both pass KiCad ERC and DRC with zero errors. |
+| MEC-09 | Lid board mounting: 4 × M3 nylon standoffs, about 10 mm, between the lid and the board front. Fix them to the lid with M3 screws and sealing washers through the template's Ø3.2 holes, or bond them on (no holes). Assembly: (1) mount the bare board; (2) each LED sits on a nylon LED spacer the same length as the standoffs, which pushes its flange against the lid; (3) solder and trim the leads. Parts: `docs/lid-pick-list.md`. J_LID hangs about 9 mm behind the board (bottom about 36 mm above the floor with the lid closed), which clears the carrier and the kit. |
 
 ---
 
@@ -531,4 +537,4 @@ Battery operation, controlling the softener, and reading data from the Culligan 
 
 | # | Question | Default |
 |---|---|---|
-| — | *All questions resolved as of v0.7.* The floor-boss positions are not used: standoffs go through M3 holes drilled in the floor (MEC-05). | |
+| — | *All questions resolved as of v0.8.* The floor-boss positions are not used: standoffs go through M3 holes drilled in the floor (MEC-05). | |
